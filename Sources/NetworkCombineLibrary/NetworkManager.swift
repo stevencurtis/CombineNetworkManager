@@ -24,9 +24,16 @@ public enum HTTPMethod: String {
 
 public class NetworkManager<T: URLSessionProtocol> {
     public let session: T
+    var task: T.dataTaskProtocolType?
+    
+    private var cancellable: AnyCancellable?
     
     public required init(session: T) {
         self.session = session
+    }
+    
+    public func cancel() {
+        cancellable?.cancel()
     }
     
     public func fetch(url: URL, method: HTTPMethod, headers: [String : String] = [:], token: String? = nil, data: [String: Any]? = nil) -> AnyPublisher<Data, NetworkError> {
@@ -52,8 +59,8 @@ public class NetworkManager<T: URLSessionProtocol> {
             }
             request.httpBody = serializedData
         }
-        
-        return session
+
+        let dataPublisher = session
             .dataTaskPub(for: request)
             .receive(on: DispatchQueue.main)
             .mapError { _ in .unknown }
@@ -73,7 +80,9 @@ public class NetworkManager<T: URLSessionProtocol> {
                 }
                 return Fail(error: NetworkError.httpError( (response as? HTTPURLResponse)?.statusCode ?? 0 ))
                     .eraseToAnyPublisher()
-        }
-        .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+        cancellable = dataPublisher.sink(receiveCompletion: {_ in }, receiveValue: {_ in })
+        return dataPublisher
     }
 }

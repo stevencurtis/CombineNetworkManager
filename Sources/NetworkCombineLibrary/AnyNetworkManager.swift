@@ -7,11 +7,18 @@ import Combine
 public class AnyNetworkManager<U: URLSessionProtocol>: NetworkManagerProtocol {
     public let session: U
     
+    let cancelClosure: ()
+    public func cancel() {
+        cancelClosure
+    }
+    
     let fetchClosure: (URL, HTTPMethod, [String : String], String?, [String : Any]?) -> AnyPublisher<Data, NetworkError>
     
     public init<T: NetworkManagerProtocol>(manager: T) {
         fetchClosure = manager.fetch
         session = manager.session as! U
+        cancelClosure = manager.cancel()
+
     }
         
     public func fetch(url: URL, method: HTTPMethod, headers: [String : String] = [:], token: String? = nil, data: [String: Any]? = nil) -> AnyPublisher<Data, NetworkError> {

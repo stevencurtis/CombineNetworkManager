@@ -3,11 +3,12 @@
 
 import Foundation
 import Combine
-@testable import NetworkCombineLibrary
 
 // the MockHTTPManager does not use the session within the response
 class MockNetworkManager <T: URLSessionProtocol>: NetworkManagerProtocol {
-    var outputData = emptyString.data(using: .utf8)
+    public func cancel() { }
+
+    var outputData = "".data(using: .utf8)
     var willSucceed = true
     let session: T
 

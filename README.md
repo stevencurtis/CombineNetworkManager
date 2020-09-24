@@ -6,8 +6,7 @@ A simple library for use with Combine to make network calls.
 - Get
 - Patch
 - Put
- - Delete
-
+- Delete
 
 ## Example
 This can be called from a view model, and the response can be used:
